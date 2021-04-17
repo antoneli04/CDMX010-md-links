@@ -1,4 +1,3 @@
-// const funcs = require("./index");
 const { convertToAbsolute, validateOptions, extraerLinks } = require("./index");
 
 const mdlinks = (path, options) =>

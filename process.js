@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const { cli } = require("./cli");
 
 const path = process.argv[2];
@@ -8,4 +10,4 @@ const options = {
 
 cli(path, options)
   .then((res) => console.log(res))
-  .catch((err) => console.log(err));
+  .catch(() => console.log("Ingrese una ruta valida"));
