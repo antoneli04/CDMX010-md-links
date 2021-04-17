@@ -29,6 +29,7 @@
     "chalk": "^4.1.0",
     "colors": "^1.4.0",
     "inquirer": "^8.0.0",
+    "marked": "^2.0.3",
     "node-fetch": "^2.6.1",
     "yargs": "^16.2.0"
   }

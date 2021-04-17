@@ -1,38 +1,36 @@
 // Desde este archivo debes exportar una función (mdLinks).
 
 const fs = require("fs");
-const colors = require("colors");
-const chalk = require("chalk");
 const path = require("path");
 const fetch = require("node-fetch");
-// const peticion = require("./fetch");
+const marked = require("marked");
 
 //----------------------------------------------------
-//Verifica si existe la ruta
+// Verifica si existe la ruta
 const existRoute = (route) => fs.existsSync(route);
-console.log(
-  existRoute("/Users/Antoneli/Documents/Developer/CDMX010-md-links/ejemplo.js")
-);
+// console.log(
+//   existRoute("/Users/Antoneli/Documents/Developer/CDMX010-md-links/ejemplo.js")
+// );
 
 //Verifica si es la ruta es absoluta
 const routeAbsolute = (route) => path.isAbsolute(route);
-console.log(routeAbsolute("README.md"));
+// console.log(routeAbsolute("README.md"));
 
 //verifica si es archivo
 const routeIsFile = (route) => fs.statSync(route).isFile();
-console.log(
-  routeIsFile(
-    "C:/Users/Antoneli/Documents/Developer/CDMX010-md-links/ejemplo.js"
-  )
-);
+// console.log(
+//   routeIsFile(
+//     "C:/Users/Antoneli/Documents/Developer/CDMX010-md-links/ejemplo.js"
+//   )
+// );
 
 // verifica su extension
 const routeIsMd = (route) => path.extname(route);
-console.log(routeIsMd("./Markdown/read.md"));
+// console.log(routeIsMd("./Markdown/read.md"));
 
 //Lee directorio
 const readDirectory = (route) => fs.readdirSync(route);
-console.log(readDirectory("./Markdown"));
+// console.log(readDirectory("./Markdown"));
 
 //relativa a absoluta
 const convertToAbsolute = (route) => {
@@ -41,16 +39,18 @@ const convertToAbsolute = (route) => {
   }
   return route;
 };
-console.log(convertToAbsolute("read.md"));
+// console.log(convertToAbsolute("read.md"));
 
 //leer directorio y especificar ruta
 const filesAndDirectories = (route) =>
   readDirectory(route).map((element) => path.join(route, element));
-console.log(
-  filesAndDirectories("C:/Users/Antoneli/Documents/Developer/CDMX010-md-links")
-);
+// console.log(
+//   filesAndDirectories(
+//     "C:/Users/Antoneli/Documents/Developer/CDMX010-md-links/Markdown"
+//   )
+// );
 
-//extraer archivos md
+//extraer archivos md con recursividad
 const searchRouteMd = (route) => {
   let mdFiles = [];
   const filePath = convertToAbsolute(route);
@@ -67,173 +67,85 @@ const searchRouteMd = (route) => {
   }
   return mdFiles;
 };
-console.log(
-  searchRouteMd(
-    "C:/Users/Antoneli/Documents/Developer/CDMX010-md-links/Markdown"
-  )
-);
+// console.log(
+//   searchRouteMd(
+//     "C:/Users/Antoneli/Documents/Developer/CDMX010-md-links/Markdown"
+//   )
+// );
 
-// leer el archivo md
-// const readFilePath = (route) => fs.readFileSync(route).toString();
+// leer el archivo md texto
+const readFilePath = (route) => fs.readFileSync(route).toString();
 // console.log(
 //   readFilePath(
 //     "C:/Users/Antoneli/Documents/Developer/CDMX010-md-links/Markdown/cifrado.md"
 //   )
 // );
 
-function readFilePath(route) {
-  const readFile = fs.readFileSync(route).toString();
-  return readFile;
-}
-
-//----------------------------------------------------
-
-// function readFile(ruta) {
-//   const readFile = fs.readFileSync(ruta, "utf-8");
-//   return readFile;
-// }
-
-function readDir(ruta) {
-  const absoluteRoute = path.resolve("./MarkDown");
-  console.log(chalk.yellow(absoluteRoute));
-  fs.readdir(ruta, (err, files) => {
-    if (err) {
-      console.error(chalk.red(err.message));
-    } else {
-      files.map((element) => {
-        const route = path.join(absoluteRoute, element);
-        console.log(route.blue);
-        const extension = path.extname(element);
-        if (extension === ".md") {
-          let data = readFilePath(route);
-          // console.log(data.yellow);
-          let regEx = /https?:\/\/[a-zA-Z\.\/-]+/gm;
-          let links = data.match(regEx);
-          console.log(links);
-          return validateLinks(links);
-        }
-      });
-    }
+// extraer links, path, text
+const extraerLinks = (route) => {
+  const arrayLinks = [];
+  const renderer = new marked.Renderer();
+  searchRouteMd(route).forEach((file) => {
+    renderer.link = function (href, title, text) {
+      const linksObject = {
+        href,
+        text,
+        file,
+      };
+      arrayLinks.push(linksObject);
+    };
+    marked(readFilePath(file), { renderer });
   });
-}
+  const arrayLinkFilter = arrayLinks.filter((element) =>
+    /https?:\/\/[a-zA-Z\.\/-]+/gm.test(element.href)
+  );
+  return arrayLinkFilter;
+};
+// console.log(
+//   extraerLinks(
+//     "C:/Users/Antoneli/Documents/Developer/CDMX010-md-links/Markdown"
+//   )
+// );
 
-readDir(__dirname + "/MarkDown");
-// readDir(__dirname + "/MarkDown/Archivos-prueba");
-
-//-----------------------------------------------
-const validateLinks = (links) => {
-  let alllinks = links.map((link) => {
-    fetch(link)
-      .then((response) => {
-        let validate = {
-          href: link,
-          text: "text",
-          path: "path",
-          status: response.status,
-          statusText: response.statusText,
-        };
-        console.log(validate);
-      })
-      .catch((err) => {
-        validate = {
-          href: err.link,
-          text: "text",
-          path: "path",
-          status: response.status,
-          statusText: response.statusText,
-        };
-        return validate;
-      });
+const validateOptions = (route) => {
+  const arrayValidate = [];
+  const linksArray = extraerLinks(route);
+  linksArray.forEach((el) => {
+    const obj = { ...el };
+    arrayValidate.push(
+      fetch(el.href)
+        .then((res) => {
+          if (res.status === 200) {
+            obj.status = res.status;
+            obj.statusText = "OK";
+            return obj;
+          }
+          if (res.status !== 200) {
+            obj.status = res.status;
+            obj.statusText = "FAIL";
+            return obj;
+          }
+        })
+        .catch(() => {
+          obj.status = "no status";
+          obj.statusText = "FAIL";
+          return obj;
+        })
+    );
   });
-  return Promise.all(alllinks).then((newresponse) => {
-    return newresponse;
-  });
+  return Promise.all(arrayValidate);
 };
 
-//--------------------------------------------------
-
-//-------------------------------
-
-// function readFile(ruta) {
-//   const readFile = fs.readFileSync(ruta, "utf-8");
-//   return readFile;
-// }
-
-// function readDir(ruta) {
-//   console.log("run");
-//   const absoluteRoute = path.resolve("./MarkDown");
-//   console.log(chalk.yellow(absoluteRoute));
-//   fs.readdir(ruta, (err, files) => {
-//     if (err) {
-//       console.error(chalk.red(err.message));
-//     } else {
-//       files.map((element) => {
-//         const route = path.join(absoluteRoute, element);
-//         console.log(route.blue);
-//         const extension = path.extname(element);
-//         if (extension === ".md") {
-//           let data = readFile(route);
-//           // console.log(data.yellow);
-//           let regEx = /https?:\/\/[a-zA-Z\.\/-]+/gm;
-//           let links = data.match(regEx);
-//           console.log(links);
-//           return validateLinks(links);
-//         }
-//       });
-//     }
-//   });
-// }
-
-// readDir(__dirname + "/MarkDown");
-// // readDir(__dirname + "/MarkDown/Archivos-prueba");
-
-// //-----------------------------------------------
-// const validateLinks = (links) => {
-//   let alllinks = links.map((link) => {
-//     fetch(link)
-//       .then((response) => {
-//         let validate = {
-//           href: link,
-//           text: "text",
-//           path: "path",
-//           status: response.status,
-//           statusText: response.statusText,
-//         };
-//         console.log(validate);
-//       })
-//       .catch((err) => {
-//         validate = {
-//           href: err.link,
-//           text: "text",
-//           path: "path",
-//           status: response.status,
-//           statusText: response.statusText,
-//         };
-//         return validate;
-//       });
-//   });
-//   return Promise.all(alllinks).then((newresponse) => {
-//     return newresponse;
-//   });
-// };
-
-// //--------------------------------------------------
-// // console.clear();
-
-// // const main = async () => {
-// //   console.log("Hola mundo");
-// //   let opt = "";
-
-// //   do {
-// //     opt = await inquirerMenu();
-// //     console.log({ opt });
-
-// //     await pausa();
-// //   } while (opt !== "0");
-
-// //   pausa();
-// // };
-
-// // main();
-
-// //-------------------------------
+module.exports = {
+  existRoute,
+  routeAbsolute,
+  routeIsFile,
+  routeIsMd,
+  readDirectory,
+  convertToAbsolute,
+  filesAndDirectories,
+  searchRouteMd,
+  readFilePath,
+  extraerLinks,
+  validateOptions,
+};

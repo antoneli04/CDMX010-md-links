@@ -48,6 +48,8 @@ aplicación en el sistema ROT13.
 
 * [ ] [Testeo unitario.](https://jestjs.io/docs/es-ES/getting-started)
 
+* [ ] [Testeo unitario.](https://jestjs.io/docs/es-ES/getting-sted)
 
 
 
+* [ ] [Testeo unitario.](https://jestjs.io/docs/es-ES/tting-started)
