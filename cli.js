@@ -3,13 +3,15 @@ const chalk = require("chalk");
 const { mdlinks } = require("./mdlinks");
 const { totalLinks, uniqueLinks, brokenLinks } = require("./options");
 
-const help = colors.cyan(`
-====================== Help =======================
-md-links <path-to-file> --validate
-md-links <path-to-file> --stats
-md-links <path-to-file> --stats --validate
-md-links <path-to-file> --validate --stats
-===================================================
+const help = chalk.cyan.inverse(`
+* * * * * * * * * * * *   Help  * * * * * * * * * * * * *
+*                                                       *
+*      md-links <path-to-file> --validate               *
+*      md-links <path-to-file> --stats                  *
+*      md-links <path-to-file> --stats --validate       *
+*      md-links <path-to-file> --validate --stats       *
+*                                                       *
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 `);
 
 const cli = (path, options) => {

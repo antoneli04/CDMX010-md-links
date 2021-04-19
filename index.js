@@ -12,16 +12,18 @@ const existRoute = (route) => fs.existsSync(route);
 //   existRoute("/Users/Antoneli/Documents/Developer/CDMX010-md-links/ejemplo.js")
 // );
 
-//Verifica si es la ruta es absoluta
+//Verifica si la ruta es absoluta
 const routeAbsolute = (route) => path.isAbsolute(route);
-// console.log(routeAbsolute("README.md"));
+// console.log(
+//   routeAbsolute(
+//     "C:/Users/Antoneli/Documents/Developer/CDMX010-md-links/process.js"
+//   )
+// );
 
 //verifica si es archivo
 const routeIsFile = (route) => fs.statSync(route).isFile();
 // console.log(
-//   routeIsFile(
-//     "C:/Users/Antoneli/Documents/Developer/CDMX010-md-links/ejemplo.js"
-//   )
+//   routeIsFile("C:/Users/Antoneli/Documents/Developer/CDMX010-md-links/process")
 // );
 
 // verifica su extension
@@ -39,7 +41,7 @@ const convertToAbsolute = (route) => {
   }
   return route;
 };
-// console.log(convertToAbsolute("read.md"));
+// console.log(convertToAbsolute("datalovers.md"));
 
 //leer directorio y especificar ruta
 const filesAndDirectories = (route) =>
@@ -50,7 +52,7 @@ const filesAndDirectories = (route) =>
 //   )
 // );
 
-//extraer archivos md con recursividad
+//extraer archivos md y recursividad
 const searchRouteMd = (route) => {
   let mdFiles = [];
   const filePath = convertToAbsolute(route);
@@ -77,7 +79,7 @@ const searchRouteMd = (route) => {
 const readFilePath = (route) => fs.readFileSync(route).toString();
 // console.log(
 //   readFilePath(
-//     "C:/Users/Antoneli/Documents/Developer/CDMX010-md-links/Markdown/cifrado.md"
+//     "C:/Users/Antoneli/Documents/Developer/CDMX010-md-links/markdown/archivos/FAQ.md"
 //   )
 // );
 
@@ -97,13 +99,13 @@ const extraerLinks = (route) => {
     marked(readFilePath(file), { renderer });
   });
   const arrayLinkFilter = arrayLinks.filter((element) =>
-    /https?:\/\/[a-zA-Z\.\/-]+/gm.test(element.href)
+    /https?:\/\/[a-zA-Z\\/-]+/gm.test(element.href)
   );
   return arrayLinkFilter;
 };
 // console.log(
 //   extraerLinks(
-//     "C:/Users/Antoneli/Documents/Developer/CDMX010-md-links/Markdown"
+//     "C:/Users/Antoneli/Documents/Developer/CDMX010-md-links/Markdown/cifrado.md"
 //   )
 // );
 
